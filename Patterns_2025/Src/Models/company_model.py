@@ -1,71 +1,68 @@
-class settings:
+from Src.Core.validator import validator
+from Src.Core.entity_model import entity_model
+
+
+###############################################
+# Модель организации
+class company_model(entity_model):
     __name: str = ""
-    __inn: str = ""
-    __account: str = ""
-    __corr_account: str = ""
-    __bik: str = ""
-    __ownership_type: str = ""
+    __inn: int = 0
+    __bic: int = 0
+    __corr_account: int = 0
+    __account: int = 0
+    __ownership: str = ""
 
+    # ИНН : 12 симв
+    # Счет 11 симв
+    # Корреспондентский счет 11 симв
+    # БИК 9 симв
+    # Наименование
+    # Вид собственности 5 симв
+
+    # ИНН
     @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value: str):
-        if value.strip() != "":
-            self.__name = value.strip()
-
-    @property
-    def inn(self) -> str:
+    def inn(self) -> int:
         return self.__inn
 
     @inn.setter
-    def inn(self, value: str):
-        value = value.strip()
-        if len(value) != 12:
-            raise ValueError("ИНН должен состоять из 12 символов")
+    def inn(self, value: int):
+        validator.validate(value, int, 12)
         self.__inn = value
 
+    # КПП
     @property
-    def account(self) -> str:
-        return self.__account
+    def bic(self) -> int:
+        return self.__bic
 
-    @account.setter
-    def account(self, value: str):
-        value = value.strip()
-        if len(value) != 11:
-            raise ValueError("Счет должен состоять из 11 символов")
-        self.__account = value
+    @bic.setter
+    def bic(self, value: int):
+        validator.validate(value, int, 9)
+        self.__bic = value
 
+    # Корреспондентский счет
     @property
-    def corr_account(self) -> str:
+    def corr_account(self) -> int:
         return self.__corr_account
 
     @corr_account.setter
-    def corr_account(self, value: str):
-        value = value.strip()
-        if len(value) != 11:
-            raise ValueError("Корреспондентский счет должен состоять из 11 символов")
+    def corr_account(self, value: int):
+        validator.validate(value, int, 11)
         self.__corr_account = value
 
     @property
-    def bik(self) -> str:
-        return self.__bik
+    def account(self) -> int:
+        return self.__account
 
-    @bik.setter
-    def bik(self, value: str):
-        value = value.strip()
-        if len(value) != 9:
-            raise ValueError("БИК должен состоять из 9 символов")
-        self.__bik = value
+    @account.setter
+    def account(self, value: int):
+        validator.validate(value, int, 11)
+        self.__account = value
 
     @property
-    def ownership_type(self) -> str:
-        return self.__ownership_type
+    def ownership(self) -> str:
+        return self.__ownership
 
-    @ownership_type.setter
-    def ownership_type(self, value: str):
-        value = value.strip()
-        if len(value) != 5:
-            raise ValueError("Вид собственности должен состоять из 5 символов")
-        self.__ownership_type = value
+    @ownership.setter
+    def ownership(self, value: str):
+        validator.validate(value, str, 5)
+        self.__ownership = value.strip()
