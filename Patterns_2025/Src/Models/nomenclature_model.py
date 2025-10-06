@@ -1,26 +1,36 @@
-from Src.Models.abstract_reference import abstract_reference
-from Src.Models.nomenclature_group_model import nomenclature_group_model
-from Src.Models.unit_model import unit_model
-from Src.exceptions import argument_exception
+# Src/Models/nomenclature_model.py
+from Src.Core.entity_model import entity_model
+from Src.Models.group_model import group_model
+from Src.Models.range_model import range_model
+from Src.Core.validator import validator
 
-class nomenclature_model(abstract_reference):
-    def __init__(self, name: str, full_name: str = "", group: nomenclature_group_model = None, unit: unit_model = None):
-        super().__init__(name)
-        full_name = full_name.strip()
-        if len(full_name) > 255:
-            raise argument_exception("Полное наименование не может превышать 255 символов")
-        self._full_name = full_name
-        self._group = group
-        self._unit = unit
+"""
+Модель номенклатуры
+"""
+class nomenclature_model(entity_model):
+    __group: group_model = None
+    __range: range_model = None
 
+    """
+    Группа номенклатуры
+    """
     @property
-    def full_name(self) -> str:
-        return self._full_name
+    def group(self) -> group_model:
+        return self.__group
 
-    @property
-    def group(self) -> nomenclature_group_model:
-        return self._group
+    @group.setter
+    def group(self, value: group_model):
+        validator.validate(value, group_model)
+        self.__group = value
 
+    """
+    Единица измерения
+    """
     @property
-    def unit(self) -> unit_model:
-        return self._unit
+    def range(self) -> range_model:
+        return self.__range
+
+    @range.setter
+    def range(self, value: range_model):
+        validator.validate(value, range_model)
+        self.__range = value
