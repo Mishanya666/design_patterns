@@ -59,10 +59,13 @@ class settings_manager:
                     data = settings["company"]
                     return self.convert(data)
 
+                if "response_format" in settings.keys():
+                    self.__settings.response_format = settings["response_format"]
+
             return False
         except:
             return False
-        
+
     # Обработать полученный словарь    
     def convert(self, data: dict) -> bool:
         validator.validate(data, dict)
@@ -74,7 +77,7 @@ class settings_manager:
             for key in matching_keys:
                 setattr(self.__settings.company, key, data[key])
         except:
-            return False        
+            return False
 
         return True
 
@@ -87,6 +90,7 @@ class settings_manager:
         
         self.__settings = settings_model()
         self.__settings.company = company
+        self.__settings.response_format = "CSV"
 
 
 
