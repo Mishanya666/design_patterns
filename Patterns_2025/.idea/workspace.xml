@@ -5,14 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="44f444c3-def7-443b-9f72-924a1b7658a9" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Src/Logics/response_json.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Src/Logics/response_markdown.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Src/Logics/response_xml.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Tst/test_response_formats.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/Logics/factory_entities.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/Logics/factory_entities.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/Models/settings_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/Models/settings_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/settings_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/settings_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/start_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/start_service.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Src/Logics/abstract_converter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Src/Logics/basic_converter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Src/Logics/convert_factory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Src/Logics/datetime_converter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Src/Logics/reference_converter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Tst/test_convert_factory.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Tst/test_converters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
