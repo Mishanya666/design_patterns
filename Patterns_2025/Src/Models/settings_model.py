@@ -5,6 +5,7 @@ from Src.Core.validator import validator
 # Модель настроек приложения
 class settings_model:
     __company: company_model = None
+    __response_format: str = "CSV"
 
     # Текущая организация
     @property
@@ -16,4 +17,13 @@ class settings_model:
         validator.validate(value, company_model)
         self.__company = value
 
+    # Формат ответа
+    @property
+    def response_format(self) -> str:
+        return self.__response_format
 
+    @response_format.setter
+    def response_format(self, value: str):
+        if value not in ["CSV", "Markdown", "Json", "XML"]:
+            raise argument_exception("Неверный формат ответа!")
+        self.__response_format = value
