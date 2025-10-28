@@ -29,5 +29,13 @@ class TestConvertFactory(unittest.TestCase):
         result = factory.convert(items)
         self.assertEqual(result, [{'value': 42}, {'value': "test"}])
 
+    def test_nested_reference(self):
+        factory = convert_factory()
+        inner = group_model("Fruits")
+        outer = nomenclature_model("Apple", inner, range_model("kg"))
+        result = factory.convert(outer)
+        self.assertEqual(result['name'], {'value': 'Apple'})
+        self.assertEqual(result['group']['name'], {'value': 'Fruits'})
+
 if __name__ == '__main__':
     unittest.main()

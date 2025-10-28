@@ -27,8 +27,8 @@ def get_data():
         json_data = json.dumps(converted_data, ensure_ascii=False, indent=4)
         return json_data, 200, {'Content-Type': 'application/json'}
     else:
-        factory_entities_inst.settings.response_format = response_format
-        data_str = factory_entities_inst.create_default(entity_type)
+        factory.settings.response_format = response_format
+        data_str = factory.create_default(entity_type)
         return data_str, 200, {'Content-Type': 'text/plain'}
 
 app = connexion.FlaskApp(__name__)
