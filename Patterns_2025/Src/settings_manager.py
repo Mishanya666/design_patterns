@@ -48,6 +48,8 @@ class settings_manager:
 
     # Загрузить настройки из Json файла
     def load(self) -> bool:
+        if "first_start" in self.settings.keys():
+            self.__settings.first_start = bool(self.settings["first_start"])
         if self.__full_file_name == "":
             raise operation_exception("Не найден файл настроек!")
 
@@ -81,7 +83,6 @@ class settings_manager:
 
         return True
 
-
     # Параметры настроек по умолчанию
     def set_default(self):
         company = company_model()
@@ -91,6 +92,15 @@ class settings_manager:
         self.__settings = settings_model()
         self.__settings.company = company
         self.__settings.response_format = "CSV"
+
+    def save(self):
+        data = {
+            "company": self.__settings.company.__dict__,
+            "response_format": self.__settings.response_format.value,
+            "first_start": self.__settings.first_start
+        }
+        with open(self.__full_file_name, 'w') as f:
+            json.dump(data, f, indent=4)
 
 
 

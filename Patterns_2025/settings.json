@@ -1,9 +1,11 @@
 {
-    "company":
-    {
-        "name":"Рога и копыта",
-        "inn":123456789
+    "company": {
+        "name": "Рога и копыта",
+        "inn": -1
     },
+    "response_format": "Json",
+    "first_start": true,
+
     "default_receipt":
     {
         "name":"ВАФЛИ ХРУСТЯЩИЕ В ВАФЕЛЬНИЦЕ",

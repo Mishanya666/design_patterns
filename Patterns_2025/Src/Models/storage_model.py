@@ -1,21 +1,19 @@
-from Src.Core.entity_model import entity_model
-from Src.Core.validator import validator
+from Src.Core.validator import validator, argument_exception
 
 
-"""
-Модель склада
-"""
-class storage_model(entity_model):
-    __address:str = ""
-
+class storage_model:
     """
-    Адрес
+    Модель склада.
     """
-    @property
-    def address(self) -> str:
-        return self.__address.strip()
-    
-    @address.setter
-    def address(self, value:str):
-        validator.validate(value, str)
-        self.__address = value.strip()
+
+    def __init__(self, name: str):
+        """
+        :param name: Наименование склада.
+        """
+
+        validator.validate(name, str)
+        if not name.strip():
+            raise argument_exception("Наименование склада не может быть пустым!")
+
+        self.name = name
+        self.unique_code = f"STORAGE_{hash(name)}"
