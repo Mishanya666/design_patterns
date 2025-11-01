@@ -34,3 +34,8 @@ class settings_model:
     def response_format(self, value: ResponseFormat):
         validator.validate(value, ResponseFormat)
         self.__response_format = value
+
+    def __init__(self):
+        self.company = company_model()
+        self.response_format = ResponseFormat.JSON
+        self.first_start = True

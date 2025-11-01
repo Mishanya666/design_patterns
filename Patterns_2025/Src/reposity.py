@@ -60,9 +60,25 @@ class reposity:
     """
     Инициализация
     """
+
     def initalize(self):
         keys = reposity.keys()
         for key in keys:
-            self.__data[ key ] = []
-    
+            self.__data[key] = []
+        
+        if reposity.storage_key() not in self.__data:
+            self.__data[reposity.storage_key()] = []
+        if reposity.transaction_key() not in self.__data:
+            self.__data[reposity.transaction_key()] = []
+
+    @staticmethod
+    def storage_key():
+        return "storage_model"
+
+    @staticmethod
+    def transaction_key():
+        return "transaction_model"
+
+
+
     
