@@ -1,7 +1,10 @@
+import os
+
 import connexion
 from flask import Response, app
 from flask import request
 
+from Src.Core.custom_exceptions import validation_exception
 from Src.Core.validator import operation_exception
 from Src.settings_manager import settings_manager
 from Src.start_service import start_service
@@ -13,27 +16,6 @@ from Src.Models.settings_model import ResponseFormat
 from datetime import datetime, date
 from Src.Logics.turnover_report import turnover_report
 
-@app.route("/api/data", methods=['GET'])
-def get_data():
-    entity_type = request.args.get('type', reposity.nomenclature_key())
-    format_str = request.args.get('format', 'Json').upper()
-    try:
-        response_format = ResponseFormat[format_str]
-    except KeyError:
-        return "Invalid format", 400
-
-    factory_entities_inst = factory_entities()
-    data = factory_entities_inst.repo.data.get(entity_type, [])
-
-    if response_format == ResponseFormat.JSON:
-        convert_fact = convert_factory()
-        converted_data = convert_fact.convert(data)
-        json_data = json.dumps(converted_data, ensure_ascii=False, indent=4)
-        return json_data, 200, {'Content-Type': 'application/json'}
-    else:
-        factory.settings.response_format = response_format
-        data_str = factory.create_default(entity_type)
-        return data_str, 200, {'Content-Type': 'text/plain'}
 
 app = connexion.FlaskApp(__name__)
 start = start_service()
@@ -133,38 +115,48 @@ def get_receipts():
     return json_data, 200, {'Content-Type': 'application/json'}
 
 
-@app.route("/api/turnover_report", methods=['GET'])
-def get_turnover_report():
-    """
-    Возвращает оборотно-сальдовую ведомость (ОСВ).
-    :param start_date: Дата начала (YYYY-MM-DD).
-    :param end_date: Дата окончания (YYYY-MM-DD).
-    :param storage: Уникальный код склада.
-    :return: JSON с таблицей ОСВ.
-    """
-    start_str = request.args.get('start_date')
-    end_str = request.args.get('end_date')
-    storage_code = request.args.get('storage')
-
-    if not all([start_str, end_str, storage_code]):
-        return "Missing parameters", 400
-
+@app.route("/api/turnover", methods=['GET'])
+def get_turnover():
     try:
+        start_str = request.args.get('start')
+        end_str = request.args.get('end')
+        storage_code = request.args.get('storage')
+
+        if not all([start_str, end_str, storage_code]):
+            raise validation_exception("Не указаны обязательные параметры")
+
         start_date = datetime.strptime(start_str, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_str, '%Y-%m-%d').date()
-        report = turnover_report.generate(start_date, end_date, storage_code)
-        return json.dumps(report, indent=4, ensure_ascii=False), 200, {'Content-Type': 'application/json'}
-    except ValueError as e:
-        return str(e), 400
-    except operation_exception as e:
-        return str(e), 400
+
+        report = turnover_report().generate(start_date, end_date, storage_code)
+
+        # Выгрузка в JSON
+        with open('generated_data/turnover_report_api.json', 'w', encoding='utf-8') as f:
+            json.dump(report, f, indent=4, ensure_ascii=False, default=str)
+
+        return json.dumps(report, indent=4, ensure_ascii=False, default=str), 200, {
+            'Content-Type': 'application/json'
+        }
+    except validation_exception as e:
+        return {"error": str(e)}, 400
+    except Exception as e:
+        return {"error": "Внутренняя ошибка сервера"}, 500
+
+from Src.Logics.data_persistence import data_persistence
+
 
 
 @app.route("/api/save", methods=['POST'])
 def save_data():
+    persistence = data_persistence()
+    if persistence.save():
+        return {"status": "success"}, 200
+    return {"status": "error"}, 500
+
     """
     Сохраняет все данные из репозитория в файл data.json.
     """
+
     repo = reposity()
     # Сериализация данных (простая, с __dict__)
     data_to_save = {}
@@ -183,7 +175,9 @@ def save_data():
 
     return "Data saved to data.json", 200
 
+
 if __name__ == '__main__':
+
     app.run(host="0.0.0.0", port=8080)
 
     settings_mgr = settings_manager()

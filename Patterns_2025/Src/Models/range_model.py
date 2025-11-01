@@ -71,10 +71,16 @@ class range_model(entity_model):
     """
     Фабричный метод из Dto
     """
+    def __init__(self, name: str, is_base: bool = False, coefficient: float = 1.0):
+        super().__init__()
+        self.name = name
+        self.is_base = is_base  # Является ли базовой единицей
+        self.coefficient = coefficient # Коэффициент пересчёта в базовую
+
     def from_dto(dto:range_dto, cache:dict):
         validator.validate(dto, range_dto)
         validator.validate(cache, dict)
         base  = cache[ dto.base_id ] if dto.base_id in cache else None
         item = range_model.create(dto.name, dto.value, base)
         return item
-    
+

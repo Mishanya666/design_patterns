@@ -13,50 +13,39 @@ class turnover_report:
     """
 
     @staticmethod
-    def generate(start_date: date, end_date: date, storage_code: str, t=None) -> List[Dict]:
-        """
-        Формирует ОСВ за период по складу.
-        :param start_date: Дата начала.
-        :param end_date: Дата окончания.
-        :param storage_code: Уникальный код склада.
-        :return: Список словарей с данными ОСВ.
-        """
-        validator.validate(start_date, date)
-        validator.validate(end_date, date)
-        validator.validate(storage_code, str)
-        if start_date > end_date:
-            raise operation_exception("Дата начала не может быть позже даты окончания!")
-
-        repo = reposity()
-        transactions: List[transaction_model] = repo.data.get(reposity.transaction_key(), [])
-        nomenclatures: List[nomenclature_model] = repo.data.get(reposity.nomenclature_key(), [])
-        storages: List[storage_model] = repo.data.get(reposity.storage_key(), [])
-
-        storage = next((s for s in storages if s.unique_code == storage_code), None)
+    def generate(self, start_date: date, end_date: date, storage_code: str) -> list:
+        storage = self._cache.get(storage_code)
         if not storage:
-            raise operation_exception(f"Склад с кодом {storage_code} не найден!")
+            raise operation_exception("Склад не найден")
 
-        report = []
-        for nom in nomenclatures:
-            # Фильтр транзакций (все в базовых единицах, без конверсии)
-            trans_before = [t for t in transactions if
-                            t.nomenclature == nom and t.storage == storage and t.date < start_date]
-            trans_period = [t for t in transactions if
-                            t.nomenclature == nom and t.storage == storage and start_date <= t.date <= end_date]
+        result = []
+        # Берём только транзакции по указанному складу
+        storage_transactions = [t for t in self._transactions if t.storage == storage]
 
-            initial_balance = sum(t.quantity for t in trans_before)
-            income = sum(t.quantity for t in trans_period if t.quantity > 0)
-            expense = abs(sum(t.quantity for t in trans_period if t.quantity < 0))
-            final_balance = initial_balance + income - expense
+        # Группируем по номенклатуре
+        nom_dict = {}
+        for t in storage_transactions:
+            nom = t.nomenclature
+            if nom not in nom_dict:
+                nom_dict[nom] = []
+            nom_dict[nom].append(t)
 
-            report.append({
+        for nom, trans_list in nom_dict.items():
+            # Только транзакции в периоде
+            trans_period = [t for t in trans_list if start_date <= t.date <= end_date]
+            trans_before = [t for t in trans_list if t.date < start_date]
+
+            initial = sum(t.quantity_base for t in trans_before)
+            income = sum(t.quantity_base for t in trans_period if t.quantity_base > 0)
+            outcome = sum(abs(t.quantity_base) for t in trans_period if t.quantity_base < 0)
+            final = initial + income - outcome
+
+            result.append({
                 "nomenclature": nom.name,
-                "unit": nom.base_unit if hasattr(nom, 'base_unit') else t.unit.name if trans_period else 'base',
-                # Базовая единица
-                "initial_balance": initial_balance,
+                "initial_balance": initial,
                 "income": income,
-                "expense": expense,
-                "final_balance": final_balance
+                "outcome": outcome,
+                "final_balance": final
             })
 
-        return report
+        return result

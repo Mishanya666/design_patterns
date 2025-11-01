@@ -5,16 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48f75525-1f53-40b1-ab4e-93a5ef8c4f8b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Src/Logics/turnover_report.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Src/Models/transaction_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Tst/test_turnover_report.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Src/Core/custom_exceptions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Src/Logics/data_persistence.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Tst/test_data_export.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Tst/test_data_persistence.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/Models/settings_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/Models/settings_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/Models/storage_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/Models/storage_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/reposity.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/reposity.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Src/settings_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/settings_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Src/Logics/turnover_report.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/Logics/turnover_report.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Src/Models/range_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/Models/range_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Src/Models/transaction_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Src/Models/transaction_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tst/test_turnover_report.py" beforeDir="false" afterPath="$PROJECT_DIR$/Tst/test_turnover_report.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/settings.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

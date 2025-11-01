@@ -1,8 +1,10 @@
+import json
 import sys
 import os
 import unittest
 from datetime import date
 import matplotlib.pyplot as plt
+from fontTools.misc.plistlib import end_date
 
 # Добавляем корень проекта
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -87,6 +89,16 @@ class TestTurnoverReport(unittest.TestCase):
         self.assertTrue(os.path.exists(path))
         print(f"\nГОТОВО! Картинка ОСВ сохранена: {path}")
 
+    def test_generate_turnover_report(self, start_date=None):
+        
+        report = turnover_report().generate(start_date, end_date, "storage_1")
+
+        # Выгрузка в JSON
+        with open('generated_data/turnover_report.json', 'w', encoding='utf-8') as f:
+            json.dump(report, f, indent=4, ensure_ascii=False, default=str)
+
+        self.assertTrue(len(report) > 0)
+        self.assertTrue(os.path.exists('generated_data/turnover_report.json'))
 
 if __name__ == '__main__':
     unittest.main()

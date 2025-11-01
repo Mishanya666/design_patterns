@@ -1,38 +1,30 @@
-from datetime import date as date_type  # Импортируем тип
+from abc import ABC
+from datetime import date
 from Src.Models.nomenclature_model import nomenclature_model
 from Src.Models.storage_model import storage_model
 from Src.Models.range_model import range_model
-from Src.Core.validator import validator, argument_exception
 
-
-class transaction_model:
+class abstract_model(ABC):
     """
-    Модель транзакции.
+    Абстрактный базовый класс для всех моделей.
     """
+    @property
+    def unique_code(self) -> str:
+        raise NotImplementedError()
 
-    def __init__(self, date: date_type, unique_number: str, nomenclature: nomenclature_model,
-                 storage: storage_model, quantity: float, unit: range_model):
-        """
-        :param date: Дата транзакции.
-        :param unique_number: Уникальный номер.
-        :param nomenclature: Номенклатура.
-        :param storage: Склад.
-        :param quantity: Количество (+ приход, - расход).
-        :param unit: Единица измерения.
-        """
-        validator.validate(date, date_type)
-        validator.validate(unique_number, str)
-        validator.validate(nomenclature, nomenclature_model)
-        validator.validate(storage, storage_model)
-        validator.validate(quantity, float)
-        validator.validate(unit, range_model)
-
-        if not unique_number.strip():
-            raise argument_exception("Уникальный номер не может быть пустым!")
-
-        self.date = date
-        self.unique_number = unique_number
+class transaction_model(abstract_model):
+    """
+    Модель транзакции. Хранит количество в базовой единице.
+    """
+    def __init__(self, nomenclature: nomenclature_model, storage: storage_model,
+                 quantity_base: float, date: date, range: range_model):
         self.nomenclature = nomenclature
         self.storage = storage
-        self.quantity = quantity
-        self.unit = unit
+        self.quantity_base = quantity_base
+        self.date = date
+        self.range = range
+        self._unique_code = f"{nomenclature.unique_code}_{storage.unique_code}_{date}"
+
+    @property
+    def unique_code(self) -> str:
+        return self._unique_code
