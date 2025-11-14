@@ -2,11 +2,14 @@ from Src.Core.abstract_response import abstract_response
 from Src.Core.common import common
 
 
+"""
+Класс для формирования данных в формате Csv
+"""
 class response_scv(abstract_response):
 
-    # Сформировать CSV
-    def create(self, format:str, data: list):
-        text = super().create(format, data)
+    # Сформировать
+    def build(self, data: list) -> str:
+        text = super().build( data)
 
         # Шапка
         item = data [ 0 ]
@@ -14,7 +17,14 @@ class response_scv(abstract_response):
         for field in fields:
             text += f"{field};"
 
+        text = text[:-1] + '\n'
+        
         # Данные
+        for obj in data:
+            for field in fields:
+                value = getattr(obj, field)
+                text += f"{value};"
+            text = text[:-1] + '\n'
 
-        return text    
+        return text.strip() 
 

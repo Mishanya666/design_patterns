@@ -25,6 +25,19 @@ class reposity:
     def group_key():
         return "group_model"
     
+    """
+    Ключ для склада
+    """
+    @staticmethod
+    def storage_key():
+        return "storage_key"
+        
+    """
+    Ключ для транзакций
+    """    
+    def transaction_key():
+        return "transaction_key"    
+    
 
     """
     Ключ для номенклатуры
