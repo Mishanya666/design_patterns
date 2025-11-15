@@ -4,6 +4,7 @@ from Src.Core.validator import operation_exception
 from Src.Core.validator import validator
 from Src.Models.company_model import company_model
 from Src.Core.common import common
+from Src.Core.response_formats import response_formats
 import os
 import json
 
@@ -57,15 +58,18 @@ class settings_manager:
 
                 if "company" in settings.keys():
                     data = settings["company"]
-                    return self.convert(data)
+                    result = self.convert(data)
+                
+                if "default_format" in settings.keys() and result == True:
+                    data = settings["default_format"]
+                    if data in response_formats.list_all_formats():
+                        self.settings.default_response_format = data
 
-                if "response_format" in settings.keys():
-                    self.__settings.response_format = settings["response_format"]
-
+                return result
             return False
         except:
             return False
-
+        
     # Обработать полученный словарь    
     def convert(self, data: dict) -> bool:
         validator.validate(data, dict)
@@ -77,7 +81,7 @@ class settings_manager:
             for key in matching_keys:
                 setattr(self.__settings.company, key, data[key])
         except:
-            return False
+            return False        
 
         return True
 
@@ -90,7 +94,6 @@ class settings_manager:
         
         self.__settings = settings_model()
         self.__settings.company = company
-        self.__settings.response_format = "CSV"
 
 
 

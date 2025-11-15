@@ -1,7 +1,6 @@
-
-import unittest
-from Src.start_service import start_service
 from Src.reposity import reposity
+from Src.start_service import start_service
+import unittest
 
 # Набор тестов для проверки работы статового сервиса
 class test_start(unittest.TestCase):
@@ -15,7 +14,13 @@ class test_start(unittest.TestCase):
         start.start()
 
         # Проверка
+        print(start.error_message)
         assert len(start.data[ reposity.range_key()]) > 0
+        assert len(start.data[ reposity.group_key()]) > 0
+        assert len(start.data[ reposity.nomenclature_key()]) > 0
+        assert len(start.data[ reposity.receipt_key()]) > 0
+        assert len(start.data[ reposity.storage_key()]) > 0
+        assert len(start.data[ reposity.transaction_key() ]) > 0
 
     # Проверить уникальность элемиентов
     def test_checkUnique_start_service_load(self):
@@ -50,5 +55,6 @@ class test_start(unittest.TestCase):
         repo.initalize() 
 
 
-
-        
+          
+if __name__ == '__main__':
+    unittest.main()  

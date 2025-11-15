@@ -1,11 +1,12 @@
 from Src.Models.company_model import company_model
-from Src.Core.validator import validator
+from Src.Core.validator import validator, argument_exception
+from Src.Core.response_formats import response_formats
 
 ######################################
 # Модель настроек приложения
 class settings_model:
     __company: company_model = None
-    __response_format: str = "CSV"
+    __default_response_format:str =  response_formats.csv()
 
     # Текущая организация
     @property
@@ -17,13 +18,18 @@ class settings_model:
         validator.validate(value, company_model)
         self.__company = value
 
-    # Формат ответа
-    @property
-    def response_format(self) -> str:
-        return self.__response_format
 
-    @response_format.setter
-    def response_format(self, value: str):
-        if value not in ["CSV", "Markdown", "Json", "XML"]:
-            raise argument_exception("Неверный формат ответа!")
-        self.__response_format = value
+    @property
+    def default_response_format(self) -> str:
+        return self.__default_response_format
+
+    # Формат ответа по умолчанию
+    @default_response_format.setter
+    def default_response_format(self, value:str):
+        validator.validate(value, str)
+        if value not in response_formats.list_all_formats():
+            raise argument_exception("Некорректно указан тип формата!")
+        
+        self.__default_response_format = value
+
+
