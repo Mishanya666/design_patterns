@@ -35,7 +35,7 @@ class reposity:
     """
     Ключ для транзакций
     """    
-    def transaction_key():
+    def transaction_key(self):
         return "transaction_key"    
     
 

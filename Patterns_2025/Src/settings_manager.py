@@ -65,7 +65,16 @@ class settings_manager:
                     if data in response_formats.list_all_formats():
                         self.settings.default_response_format = data
 
+                if "default_refenences" in settings.keys():
+                    self.__settings.default_refenences = settings["default_refenences"]
+
+                if "default_transactions" in settings.keys():
+                    self.__settings.default_transactions = settings["default_transactions"]
+
+                if "default_receipt" in settings.keys():
+                    self.__settings.default_receipt = settings["default_receipt"]
                 return result
+
             return False
         except:
             return False
