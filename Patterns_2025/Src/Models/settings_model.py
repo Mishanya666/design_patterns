@@ -1,10 +1,28 @@
 from Src.Models.company_model import company_model
 from Src.Core.validator import validator, argument_exception
 from Src.Core.response_formats import response_formats
-
+from datetime import date
+from typing import Optional
 ######################################
 # Модель настроек приложения
 class settings_model:
+    def __init__(self):
+        self.company = None
+        self.default_refenences = {}
+        self.default_transactions = []
+        self.default_receipt = {}
+        self.default_response_format = "json"
+        self._block_period: Optional[date] = None  # НОВАЯ настройка
+
+    @property
+    def block_period(self) -> Optional[date]:
+        return self._block_period or date(1900, 1, 1)
+
+    @block_period.setter
+    def block_period(self, value: str):
+        from datetime import datetime
+        self._block_period = datetime.strptime(value, "%Y-%m-%d").date()
+
     __company: company_model = None
     __default_response_format:str =  response_formats.csv()
 
