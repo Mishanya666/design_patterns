@@ -1,19 +1,7 @@
 from Src.Core.validator import validator
-
-from Src.Core.common import common
-from abc import ABC, abstractmethod
-from typing import List, Any, Optional
-from copy import deepcopy
 from Src.Dtos.filter_dto import filter_dto
+from Src.Core.common import common
 
-class IPrototype(ABC):
-    @abstractmethod
-    def clone(self) -> 'IPrototype':
-        pass
-
-    @abstractmethod
-    def execute(self, data: List[dict], filter_dto: filter_dto) -> List[dict]:
-        pass
 # Абстрактный класс - прототип
 class prototype:
     __data = []

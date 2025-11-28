@@ -1,61 +1,60 @@
 from Src.Core.abstract_dto import abstract_dto
-from Src.Core.filter_type import FilterType
-from typing import Optional
+from Src.Core.condition_type import condition_type
+from Src.Core.validator import validator
 
+# Фильтрация
 class filter_dto(abstract_dto):
-    __name: Optional[str] = None
-    __name_filter: FilterType = FilterType.LIKE
+    __field_name:str = ""
+    __value:str = ""
+    __condition:condition_type = condition_type.EQUALS
 
-    __code: Optional[str] = None
-    __code_filter: FilterType = FilterType.EQUALS
 
-    __base_id: Optional[str] = None
-    __parent_id: Optional[str] = None
-
+    # Поле по которому формировать фильтрацию
     @property
-    def name(self) -> Optional[str]:
-        return self.__name
+    def field_name(self) -> str:
+        return self.__field_name
+    
+    @field_name.setter
+    def field_name(self, value:str):
+        validator.validate(value, str)
+        self.__field_name = value
 
-    @name.setter
-    def name(self, value: Optional[str]):
-        self.__name = value
-
+    # Значение фильтра
     @property
-    def name_filter(self) -> FilterType:
-        return self.__name_filter
+    def value(self) -> str:
+        return self.__value
+    
+    @value.setter
+    def value(self, value:str):
+        self.__value = value
 
-    @name_filter.setter
-    def name_filter(self, value: FilterType):
-        self.__name_filter = value
-
+    # Тип сравнения
     @property
-    def code(self) -> Optional[str]:
-        return self.__code
+    def condition(self) -> condition_type:
+        return self.__condition
+    
+    @condition.setter
+    def condition(self, value:condition_type):
+        validator.validate(value, condition_type)
+        self.__condition = value
 
-    @code.setter
-    def code(self, value: Optional[str]):
-        self.__code = value
 
-    @property
-    def code_filter(self) -> FilterType:
-        return self.__code_filter
+    # Фабричный метод.    
+    def create_equals_filter(field_name:str, value:str) -> "filter_dto":
+        dto = filter_dto()
+        dto.field_name = field_name
+        dto.value = value
+        dto.condition = condition_type.EQUALS
+        return dto
 
-    @code_filter.setter
-    def code_filter(self, value: FilterType):
-        self.__code_filter = value
 
-    @property
-    def base_id(self) -> Optional[str]:
-        return self.__base_id
+    # Фабричный метод.
+    def create_less_or_equals_filter(field_name:str, value:str) -> "filter_dto":
+        dto = filter_dto()
+        dto.field_name = field_name
+        dto.value = value
+        dto.condition = condition_type.LESSOREQUALS
+        return dto
 
-    @base_id.setter
-    def base_id(self, value: Optional[str]):
-        self.__base_id = value
 
-    @property
-    def parent_id(self) -> Optional[str]:
-        return self.__parent_id
 
-    @parent_id.setter
-    def parent_id(self, value: Optional[str]):
-        self.__parent_id = value

@@ -14,8 +14,7 @@ class common:
         for  inheritor in entity_model.__subclasses__():
             result.append(inheritor.__name__)
 
-        return result    
-
+        return result  
 
     """
     Получить полный список полей любой модели
@@ -42,3 +41,15 @@ class common:
 
         return result
    
+
+    """
+    Сконвертировать список моделей в dto
+    """
+    @staticmethod
+    def models_to_dto(items:list) -> list:
+        result = []
+        for item in items:
+            if isinstance(item, abstact_model):
+                result.append(  item.to_dto() )
+
+        return result        
