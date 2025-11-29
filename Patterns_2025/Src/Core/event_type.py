@@ -11,7 +11,7 @@ class event_type:
     @staticmethod
     def change_block_period() -> str:
         return "change_block_period"
-    
+
     """
     Событие - сформирован Json
     """
@@ -33,4 +33,10 @@ class event_type:
 
         return result
 
-    
+    @staticmethod
+    def nomenclature_updated() -> str:
+        return "nomenclature_updated"
+
+    @staticmethod
+    def nomenclature_deleted() -> str:
+        return "nomenclature_deleted"

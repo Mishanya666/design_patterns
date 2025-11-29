@@ -15,6 +15,8 @@ from Src.Models.transaction_model import transaction_model
 from Src.Dtos.transaction_dto import transaction_dto
 from Src.Core.abstract_manager import abstract_manager
 from Src.Dtos.receipt_dto import receipt_dto
+from Src.Services.reference_service import reference_service
+from Src.Services.rest_recalculator import rest_recalculator
 
 class start_manager(abstract_manager):
     # Репозиторий
@@ -199,6 +201,7 @@ class start_manager(abstract_manager):
         self.file_name = "default.json"
         result = self.load()
         if result == False:
-            raise operation_exception(f"Невозможно сформировать стартовый набор данных!\nОписание: {self.error_message}") 
-        
+            raise operation_exception(f"Невозможно сформировать стартовый набор данных!\nОписание: {self.error_message}")
 
+        reference_service()
+        rest_recalculator()
