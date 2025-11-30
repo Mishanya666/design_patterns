@@ -7,7 +7,7 @@ from Src.Core.response_formats import response_formats
 import json
 from datetime import datetime
 from Src.Core.abstract_manager import abstract_manager
-
+from Src.Core.observe_service import observe_service
 ####################################################3
 # Менеджер настроек. 
 # Предназначен для управления настройками и хранения параметров приложения
@@ -20,10 +20,7 @@ class settings_manager(abstract_manager):
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(settings_manager, cls).__new__(cls)
-        return cls.instance 
-    
-    def __init__(self):
-        self.__set_default()
+        return cls.instance
 
     # Текущие настройки
     @property
@@ -85,7 +82,40 @@ class settings_manager(abstract_manager):
         self.__settings = settings_model()
         self.__settings.company = company
 
-        
+    def __init__(self):
+        super().__init__()  # Было self.__set_default()
+        self.__set_default()
+
+        observe_service.add(self)
+
+    # Добавляем обработчик событий
+    def handle(self, event: str, params):
+
+        if event.endswith("_created") or event.endswith("_updated") or event.endswith("_deleted"):
+            self._save_to_file()
+
+    def _save_to_file(self):
+        """Сохранить текущие настройки в appsettings.json"""
+        try:
+            data = {
+                "company": {
+                    "name": self.settings.company.name,
+                    "inn": self.settings.company.inn
+                },
+                "default_format": self.settings.default_response_format,
+                "block_period": self.settings.block_period.strftime("%Y-%m-%d")
+                if self.settings.block_period else None
+            }
+            with open("appsettings.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4, default=str)
+
+            # Успешно — очищаем ошибку, если была
+            if self.is_error:
+                self.error_text = ""
+
+        except Exception as e:
+            self.set_exception(operation_exception(f"Не удалось сохранить настройки в appsettings.json: {e}"))
+
 
 
 
