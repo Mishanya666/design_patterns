@@ -11,111 +11,115 @@ from Src.Core.observe_service import observe_service
 ####################################################3
 # Менеджер настроек. 
 # Предназначен для управления настройками и хранения параметров приложения
-class settings_manager(abstract_manager):
 
-    # Настройки
-    __settings:settings_model = None
+class SettingsManager(AbstractSubscriber):
+    # Ссылка на экземпляр SettingsManager
+    __instance = None
 
-    # Singletone
+    # Абсолютный путь до файла с загруженными настройками
+    __file_name: str = ""
+
+    # Инкупсулирумый объект настроек
+    __settings: SettingsModel
+
+    def __init__(self):
+        self.default()
+        observe_service.add(self)
+
     def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(settings_manager, cls).__new__(cls)
-        return cls.instance
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
 
-    # Текущие настройки
+    """Абсолютный путь к файлу с настройками"""
+
     @property
-    def settings(self) -> settings_model:
+    def file_name(self) -> str:
+        return self.__file_name
+
+    @file_name.setter
+    def file_name(self, value: str):
+        self.__file_name = vld.is_file_exists(value)
+
+    """Настройки с хранящейся моделью компании"""
+
+    @property
+    def settings(self) -> SettingsModel:
         return self.__settings
 
-    # Загрузить настройки из Json файла
-    def load(self) -> bool:
-        if self.file_name == "":
-            raise operation_exception("Не найден файл настроек!")
+    @settings.setter
+    def settings(self, value: SettingsModel):
+        vld.validate(value, SettingsModel, "settings")
+        self.__settings = value
 
+    """Метод загрузки файла настроек"""
+
+    def load(self, file_name: str) -> bool:
+        self.file_name = file_name
         try:
-            with open( self.file_name, 'r') as file_instance:
-                settings = json.load(file_instance)
+            with open(self.file_name, mode='r', encoding='utf-8') as file:
+                settings = json.load(file)
+                self.convert_company_data(settings["company"])
+                self.convert_response_format(settings["default_response_format"])
 
-                # Реквизиты оргаизации
-                if "company" in settings.keys():
-                    data = settings["company"]
-                    result = self.__deserialize(data)
-                
-                # Формат по умолчанию
-                if "default_format" in settings.keys() and result == True:
-                    data = settings["default_format"]
-                    if data in response_formats.list_all_formats():
-                        self.settings.default_response_format = data
+                # Проверяем, нужно ли загружать данные при первом старте
+                if settings.get("first_start", False):
+                    pass
 
-                # Дата блокировки
-                if "block_period" in settings.keys() and result == True:
-                    data = settings["block_period"]
-                    date_format = "%Y-%m-%d"
-                    date = datetime.strptime(data, date_format)
-                    self.__settings.block_period = date
-                return result
+                return True
+        except Exception as e:
             return False
-        except:
-            return False
-        
-    # Обработать полученный словарь    
-    def __deserialize(self, data: dict) -> bool:
-        validator.validate(data, dict)
 
-        fields = common.get_fields(self.__settings.company)
-        matching_keys = list(filter(lambda key: key in fields, data.keys()))
+    """Метод извлечения данных компании из загуженного файла настроек"""
+
+    def convert_company_data(self, data: dict) -> bool:
+        vld.is_dict(data, "data")
+
+        # Поля модели компании, которые могут быть заполнены
+        company_model_fields = [
+            field for field in dir(self.settings.company)
+            if not field.startswith("_")
+        ]
+        # Ключи загруженного объекта настроек
+        matching_keys = [
+            key for key in data.keys()
+            if key in company_model_fields
+        ]
 
         try:
             for key in matching_keys:
-                setattr(self.__settings.company, key, data[key])
+                setattr(self.settings.company, key, data[key])
+            return True
         except:
-            return False        
+            return False
 
-        return True
+    """Метод загрузки формата ответов по умолчанию из файла настроек"""
 
-    # Параметры настроек по умолчанию
-    def __set_default(self):
-        company = company_model()
-        company.name = "Рога и копыта"
-        company.inn = -1
-        
-        self.__settings = settings_model()
-        self.__settings.company = company
-
-    def __init__(self):
-        super().__init__()  # Было self.__set_default()
-        self.__set_default()
-
-        observe_service.add(self)
-
-    # Добавляем обработчик событий
-    def handle(self, event: str, params):
-
-        if event.endswith("_created") or event.endswith("_updated") or event.endswith("_deleted"):
-            self._save_to_file()
-
-    def _save_to_file(self):
-        """Сохранить текущие настройки в appsettings.json"""
+    def convert_response_format(self, data: str) -> bool:
+        from src.logics.factory_entities import FactoryEntities
         try:
-            data = {
-                "company": {
-                    "name": self.settings.company.name,
-                    "inn": self.settings.company.inn
-                },
-                "default_format": self.settings.default_response_format,
-                "block_period": self.settings.block_period.strftime("%Y-%m-%d")
-                if self.settings.block_period else None
-            }
-            with open("appsettings.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4, default=str)
+            format = FactoryEntities.match_formats[data]
+            self.settings.response_format = format
+            return True
+        except KeyError:
+            return False
 
-            # Успешно — очищаем ошибку, если была
-            if self.is_error:
-                self.error_text = ""
+    """Метод инициализации стандартных значений полей"""
 
-        except Exception as e:
-            self.set_exception(operation_exception(f"Не удалось сохранить настройки в appsettings.json: {e}"))
+    def default(self):
+        self.settings = SettingsModel()
+        self.settings.company.name = "Default Name"
+        self.settings.company.ownership = "owner"
 
+    """
+    Обработка событий
+    """
 
+    def handle(self, event: str, params: dict):
+        vld.validate(params, dict, "params")
+        super().handle(event, params)
 
-
+        if event == event_type.change_block_period():
+            new_block_date = params["new_block_date"]
+            vld.validate(new_block_date, datetime, "new_block_date")
+            self.__settings.block_date = new_block_date
