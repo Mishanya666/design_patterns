@@ -1,96 +1,125 @@
 from Src.Models.settings_model import settings_model
-from Src.Core.validator import argument_exception
 from Src.Core.validator import operation_exception
 from Src.Core.validator import validator
 from Src.Models.company_model import company_model
 from Src.Core.common import common
-import os
+from Src.Core.response_formats import response_formats
 import json
-
+from datetime import datetime
+from Src.Core.abstract_manager import abstract_manager
+from Src.Core.observe_service import observe_service
 ####################################################3
 # Менеджер настроек. 
 # Предназначен для управления настройками и хранения параметров приложения
-class settings_manager:
-    # Наименование файла (полный путь)
-    __full_file_name:str = ""
 
-    # Настройки
-    __settings:settings_model = None
+class SettingsManager(AbstractSubscriber):
+    # Ссылка на экземпляр SettingsManager
+    __instance = None
 
-    # Singletone
-    def __new__(cls):
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(settings_manager, cls).__new__(cls)
-        return cls.instance 
-    
+    # Абсолютный путь до файла с загруженными настройками
+    __file_name: str = ""
+
+    # Инкупсулирумый объект настроек
+    __settings: SettingsModel
+
     def __init__(self):
-        self.set_default()
+        self.default()
+        observe_service.add(self)
 
-    # Текущие настройки
-    @property
-    def settings(self) -> settings_model:
-        return self.__settings
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
+        return cls.__instance
 
-    # Текущий файл
+    """Абсолютный путь к файлу с настройками"""
+
     @property
     def file_name(self) -> str:
-        return self.__full_file_name
+        return self.__file_name
 
-    # Полный путь к файлу настроек
     @file_name.setter
-    def file_name(self, value:str):
-        validator.validate(value, str)
-        full_file_name = os.path.abspath(value)        
-        if os.path.exists(full_file_name):
-            self.__full_file_name = full_file_name.strip()
-        else:
-            raise argument_exception(f'Не найден файл настроек {full_file_name}')
+    def file_name(self, value: str):
+        self.__file_name = vld.is_file_exists(value)
 
-    # Загрузить настройки из Json файла
-    def load(self) -> bool:
-        if self.__full_file_name == "":
-            raise operation_exception("Не найден файл настроек!")
+    """Настройки с хранящейся моделью компании"""
 
+    @property
+    def settings(self) -> SettingsModel:
+        return self.__settings
+
+    @settings.setter
+    def settings(self, value: SettingsModel):
+        vld.validate(value, SettingsModel, "settings")
+        self.__settings = value
+
+    """Метод загрузки файла настроек"""
+
+    def load(self, file_name: str) -> bool:
+        self.file_name = file_name
         try:
-            with open( self.__full_file_name, 'r') as file_instance:
-                settings = json.load(file_instance)
+            with open(self.file_name, mode='r', encoding='utf-8') as file:
+                settings = json.load(file)
+                self.convert_company_data(settings["company"])
+                self.convert_response_format(settings["default_response_format"])
 
-                if "company" in settings.keys():
-                    data = settings["company"]
-                    return self.convert(data)
+                # Проверяем, нужно ли загружать данные при первом старте
+                if settings.get("first_start", False):
+                    pass
 
-                if "response_format" in settings.keys():
-                    self.__settings.response_format = settings["response_format"]
-
+                return True
+        except Exception as e:
             return False
-        except:
-            return False
 
-    # Обработать полученный словарь    
-    def convert(self, data: dict) -> bool:
-        validator.validate(data, dict)
+    """Метод извлечения данных компании из загуженного файла настроек"""
 
-        fields = common.get_fields(self.__settings.company)
-        matching_keys = list(filter(lambda key: key in fields, data.keys()))
+    def convert_company_data(self, data: dict) -> bool:
+        vld.is_dict(data, "data")
+
+        # Поля модели компании, которые могут быть заполнены
+        company_model_fields = [
+            field for field in dir(self.settings.company)
+            if not field.startswith("_")
+        ]
+        # Ключи загруженного объекта настроек
+        matching_keys = [
+            key for key in data.keys()
+            if key in company_model_fields
+        ]
 
         try:
             for key in matching_keys:
-                setattr(self.__settings.company, key, data[key])
+                setattr(self.settings.company, key, data[key])
+            return True
         except:
             return False
 
-        return True
+    """Метод загрузки формата ответов по умолчанию из файла настроек"""
 
+    def convert_response_format(self, data: str) -> bool:
+        from src.logics.factory_entities import FactoryEntities
+        try:
+            format = FactoryEntities.match_formats[data]
+            self.settings.response_format = format
+            return True
+        except KeyError:
+            return False
 
-    # Параметры настроек по умолчанию
-    def set_default(self):
-        company = company_model()
-        company.name = "Рога и копыта"
-        company.inn = -1
-        
-        self.__settings = settings_model()
-        self.__settings.company = company
-        self.__settings.response_format = "CSV"
+    """Метод инициализации стандартных значений полей"""
 
+    def default(self):
+        self.settings = SettingsModel()
+        self.settings.company.name = "Default Name"
+        self.settings.company.ownership = "owner"
 
+    """
+    Обработка событий
+    """
 
+    def handle(self, event: str, params: dict):
+        vld.validate(params, dict, "params")
+        super().handle(event, params)
+
+        if event == event_type.change_block_period():
+            new_block_date = params["new_block_date"]
+            vld.validate(new_block_date, datetime, "new_block_date")
+            self.__settings.block_date = new_block_date
